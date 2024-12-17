@@ -17,14 +17,12 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '1216-197-136-53-2.ngrok-free.app',
+    'c8c2-102-7-4-140.ngrok-free.app'
+]
+CSRF_TRUSTED_ORIGINS = [
+    'https://c8c2-102-7-4-140.ngrok-free.app'
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://1216-197-136-53-2.ngrok-free.app',
-    'https://1216-197-136-53-2.ngrok-free.app',
-]
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -33,9 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
     'events',
-    
     'rest_framework',
     'crispy_forms',
     'crispy_bootstrap4',
@@ -174,9 +170,9 @@ SECURE_FRAME_DENY               = False
 
 #EMAIL SETTINGS
 # settings.py
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # ill change this later
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'legendarymeetup@gmail.com'
-EMAIL_HOST_PASSWORD = 'Comrade1Celestial001@2'
+EMAIL_HOST_PASSWORD = 'negg btgi fahb endt' #the app password

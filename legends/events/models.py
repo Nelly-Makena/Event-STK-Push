@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from django.utils.timezone import now
 
 
 class MpesaTransaction(models.Model):
@@ -12,15 +11,16 @@ class MpesaTransaction(models.Model):
     MpesaReceiptNumber = models.CharField(max_length=15, blank=True, null=True)
     TransactionDate = models.DateTimeField(blank=True, null=True)
     PhoneNumber = models.CharField(max_length=13, blank=True, null=True)
+    event_registration = models.ForeignKey('EventRegistration', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return f"{self.PhoneNumber} HAS PAID  {self.Amount} : {self.MpesaReceiptNumber}"
-
+        return f"{self.PhoneNumber} HAS PAID {self.Amount} : {self.MpesaReceiptNumber}"
 
     class Meta:
-        verbose_name = ("M-PESA  Payment")
-        verbose_name_plural = ("M-PESA  Payments")
-        
+        verbose_name = ("M-PESA Payment")
+        verbose_name_plural = ("M-PESA Payments")
+
+
 class EventRegistration(models.Model):
     # Choices for the 'Are you a student?' field
     YES_NO_CHOICES = [
@@ -40,3 +40,5 @@ class EventRegistration(models.Model):
 
     def __str__(self):
         return self.name
+
+

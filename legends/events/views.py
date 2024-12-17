@@ -96,7 +96,7 @@ def initiate_mpesa_stk_push(phone_number,amount):
             "BusinessShortCode": shortcode,
             "Password": password,
             "Timestamp": timestamp,
-            "TransactionType": "CustomerPayBillOnline",
+            "TransactionType": "CustomerBuyGoodsOnline", 
             "Amount": str(amount),
             "PartyA": phone_number,
             "PartyB": shortcode,
