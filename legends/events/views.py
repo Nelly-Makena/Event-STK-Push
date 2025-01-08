@@ -17,7 +17,13 @@ from django.utils.timezone import now
 from rest_framework.decorators import api_view
 from rest_framework.generics import CreateAPIView
 from django.views.decorators.csrf import csrf_exempt
-from django.core.mail import send_mail
+from django.conf import settings
+import environ
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+env = environ.Env()
+environ.Env.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 
 # Event registration view
 
@@ -52,11 +58,10 @@ def generate_password(shortcode, passkey, timestamp):
     password_string = f"{shortcode}{passkey}{timestamp}"
     return base64.b64encode(password_string.encode('utf-8')).decode('utf-8')
 
-
 def get_access_token():
-    consumer_key = 'WumSttSJpeqk2HONJJtTg0w1oRaPVwQZF22HpRI8VAbVZx5K'
-    consumer_secret = 'MEtFVM2mp9O2WKAT8GBI3IKA6Vn88AJ7nytMgTblsw9RJtT1WwGcllftp0uGjehH'
-    url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+    consumer_key = env('consumer_key')
+    consumer_secret = env('consumer_secret')
+    url = env("url")
 
     headers = {
         "Authorization": f"Basic {base64.b64encode(f'{consumer_key}:{consumer_secret}'.encode()).decode()}"
@@ -82,11 +87,11 @@ def get_access_token():
 def initiate_mpesa_stk_push(phone_number,amount):
     try:
         # Mpesa credentials
-        shortcode = '174379'
-        passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+        shortcode = env('shortcode')
+        passkey = env('passkey')
         amount = amount
         phone_number = phone_number
-        callback_url = 'https://1216-197-136-53-2.ngrok-free.app/callback/'
+        callback_url = 'https://24c6-102-5-123-183.ngrok-free.app/callback/'
         # timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = generate_password(shortcode, passkey, timestamp)
@@ -96,16 +101,16 @@ def initiate_mpesa_stk_push(phone_number,amount):
             "BusinessShortCode": shortcode,
             "Password": password,
             "Timestamp": timestamp,
-            "TransactionType": "CustomerBuyGoodsOnline", 
+            "TransactionType": "CustomerPayBillOnline",
             "Amount": str(amount),
             "PartyA": phone_number,
             "PartyB": shortcode,
             "PhoneNumber": phone_number,
             "CallBackURL": callback_url,
-            "AccountReference": "TestAccount",
+            "AccountReference": "Legendary Event",
             "TransactionDesc": "Payment for service"
         }
-        
+
         access_token = get_access_token()
         
         headers = {
@@ -148,6 +153,7 @@ transaction_date = now()
 
 logger = logging.getLogger(__name__)
 
+
 class MpesaExpressCallback(APIView):
     """
     Handles the MPesa Express Callback from Safaricom
@@ -156,7 +162,7 @@ class MpesaExpressCallback(APIView):
     def post(self, request, *args, **kwargs):
         try:
             logger.debug(f"Callback data received: {request.data}")
-            
+
             callback_body = request.data.get("Body", {}).get("stkCallback", {})
             if not callback_body:
                 return Response({"error": "Invalid callback data"}, status=HTTP_400_BAD_REQUEST)
@@ -166,7 +172,7 @@ class MpesaExpressCallback(APIView):
             merchant_request_id = callback_body.get("MerchantRequestID", "")
             result_code = callback_body.get("ResultCode", 1)  # Default to error code
             result_desc = callback_body.get("ResultDesc", "Unknown error")
-            
+
             # Process metadata
             metadata = callback_body.get("CallbackMetadata", {}).get("Item", [])
             amount, receipt_number, phone_number, transaction_date = None, None, None, None

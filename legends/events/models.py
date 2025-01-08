@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils import timezone
+from django.utils.timezone import now
+
 
 
 class MpesaTransaction(models.Model):

@@ -1,3 +1,10 @@
+import environ
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+env = environ.Env()
+environ.Env.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 
 from pathlib import Path
 
@@ -9,18 +16,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+@1ua!c-=j638g6ro8_gg4rk7v7d1ea-qc0l=_penf++$5fh&0'
+SECRET_KEY = env('SECRET_KEY')
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'c8c2-102-7-4-140.ngrok-free.app'
+    '127.0.0.1',  # Localhost
+    '24c6-102-5-123-183.ngrok-free.app',  # Your Ngrok URL
 ]
+
+
 CSRF_TRUSTED_ORIGINS = [
-    'https://c8c2-102-7-4-140.ngrok-free.app'
+    'https://24c6-102-5-123-183.ngrok-free.app',  # Ngrok URL
 ]
 
 
@@ -170,9 +179,10 @@ SECURE_FRAME_DENY               = False
 
 #EMAIL SETTINGS
 # settings.py
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # ill change this later
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'legendarymeetup@gmail.com'
-EMAIL_HOST_PASSWORD = 'negg btgi fahb endt' #the app password
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')

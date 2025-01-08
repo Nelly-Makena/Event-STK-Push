@@ -7,8 +7,9 @@ from django.conf import settings
 
 @receiver(post_save, sender=MpesaTransaction)
 def send_email_on_transaction_save(sender, instance, created, **kwargs):
-    print("Signal triggered")
     if created:
+        print("Signal triggered")
+
         if instance.event_registration:
             recipient_email = instance.event_registration.email
 
