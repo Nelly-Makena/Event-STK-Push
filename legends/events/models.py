@@ -13,14 +13,14 @@ class MpesaTransaction(models.Model):
     MpesaReceiptNumber = models.CharField(max_length=15, blank=True, null=True)
     TransactionDate = models.DateTimeField(blank=True, null=True)
     PhoneNumber = models.CharField(max_length=13, blank=True, null=True)
-    event_registration = models.ForeignKey('EventRegistration', on_delete=models.CASCADE, null=True)
-
+    email = models.CharField(max_length=20,blank=True)
     def __str__(self):
         return f"{self.PhoneNumber} HAS PAID {self.Amount} : {self.MpesaReceiptNumber}"
 
     class Meta:
         verbose_name = ("M-PESA Payment")
         verbose_name_plural = ("M-PESA Payments")
+
 
 
 class EventRegistration(models.Model):
@@ -30,6 +30,13 @@ class EventRegistration(models.Model):
         ('no', 'No'),
     ]
 
+    # Choices for the 'Payment Status' field (adjust to your needs)
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+    ]
+
     name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
@@ -37,10 +44,11 @@ class EventRegistration(models.Model):
         max_length=3, choices=YES_NO_CHOICES, default='no'
     )
     school_name = models.CharField(
-        max_length=255, blank=True, null=True
+        max_length=255, blank=True,null=True
+    )
+    payment_status = models.CharField(
+        max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending'
     )
 
     def __str__(self):
         return self.name
-
-

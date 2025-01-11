@@ -9,5 +9,5 @@ urlpatterns = [
     path('', register_event_view, name='register_event'),
     path('thank-you/', thank_you_view, name='thank_you'),
     path('initiate/', initiate_mpesa_stk_push, name='initiate_stk_push'),
-    path('callback/',MpesaExpressCallback.as_view(), name='mpesa_express_callback'),
+    path('callback/', MpesaExpressCallback.as_view(), name='mpesa_express_callback'),
 ]

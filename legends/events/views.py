@@ -20,6 +20,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import environ
 import os
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 env = environ.Env()
@@ -33,9 +36,11 @@ def register_event_view(request):
         if form.is_valid():
             # Saves the form data if valid
             form.save()
-            phone_number = form.cleaned_data['phone_number']  # Get phone number from the  form
+            phone_number = form.cleaned_data['phone_number']
+            email = form.cleaned_data["email"]
+            request.session['email'] = email     # Get phone number from the  form
             amount = 1  # The set amount,  i will change this later
-            stk_push_success = initiate_mpesa_stk_push(phone_number,amount)
+            stk_push_success = initiate_mpesa_stk_push(phone_number,amount,request)
 
             # Redirect to the thank you page if the STK push is successful
             if stk_push_success:
@@ -61,7 +66,7 @@ def generate_password(shortcode, passkey, timestamp):
 def get_access_token():
     consumer_key = env('consumer_key')
     consumer_secret = env('consumer_secret')
-    url = env("url")
+    url = env('url')
 
     headers = {
         "Authorization": f"Basic {base64.b64encode(f'{consumer_key}:{consumer_secret}'.encode()).decode()}"
@@ -84,17 +89,19 @@ def get_access_token():
 
 
 
-def initiate_mpesa_stk_push(phone_number,amount):
+def initiate_mpesa_stk_push(phone_number,amount,request):
     try:
         # Mpesa credentials
         shortcode = env('shortcode')
         passkey = env('passkey')
         amount = amount
         phone_number = phone_number
-        callback_url = 'https://24c6-102-5-123-183.ngrok-free.app/callback/'
+        callback_url = 'https://7256-154-77-75-130.ngrok-free.app/callback/'
         # timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = generate_password(shortcode, passkey, timestamp)
+        email = request.session.get('email')
+        print("email",email)
 
         # Payload for the API
         payload = {
@@ -107,12 +114,12 @@ def initiate_mpesa_stk_push(phone_number,amount):
             "PartyB": shortcode,
             "PhoneNumber": phone_number,
             "CallBackURL": callback_url,
-            "AccountReference": "Legendary Event",
+            "AccountReference":email,
             "TransactionDesc": "Payment for service"
         }
 
         access_token = get_access_token()
-        
+
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
@@ -154,6 +161,8 @@ transaction_date = now()
 logger = logging.getLogger(__name__)
 
 
+
+@method_decorator(csrf_exempt, name='dispatch')
 class MpesaExpressCallback(APIView):
     """
     Handles the MPesa Express Callback from Safaricom
@@ -186,6 +195,8 @@ class MpesaExpressCallback(APIView):
                     phone_number = item["Value"]
                 elif item["Name"] == "TransactionDate":
                     transaction_date = item["Value"]
+                elif item['Name'] == "AccountReference":
+                    account_reference = item["Value"]
 
             # Convert transaction date
             if transaction_date:
@@ -210,10 +221,11 @@ class MpesaExpressCallback(APIView):
                 MpesaReceiptNumber=receipt_number,
                 TransactionDate=aware_transaction_datetime,
                 PhoneNumber=phone_number,
+                email=account_reference,
             )
 
-            return Response({"status": "success", "message": "Callback handled successfully"}, status=HTTP_200_OK)
+            return JsonResponse({"status": "success", "message": "Callback handled successfully"}, status=HTTP_200_OK)
 
         except Exception as e:
             logger.exception("Error processing MPesa callback.")
-            return Response({"error": "An error occurred", "details": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "An error occurred", "details": str(e)}, status=HTTP_400_BAD_REQUEST)
