@@ -22,12 +22,17 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['7256-154-77-75-130.ngrok-free.app', 'localhost', '127.0.0.1']
 
+
+ALLOWED_HOSTS = [
+    '2e65-154-159-252-51.ngrok-free.app',
+    'localhost',
+    '127.0.0.1',
+]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://7256-154-77-75-130.ngrok-free.app',
-    'https://7256-154-77-75-130.ngrok-free.app',
+    'http://2e65-154-159-252-51.ngrok-free.app',
+    'https://2e65-154-159-252-51.ngrok-free.app',
 ]
 
 

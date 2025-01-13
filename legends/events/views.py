@@ -37,10 +37,8 @@ def register_event_view(request):
             # Saves the form data if valid
             form.save()
             phone_number = form.cleaned_data['phone_number']
-            email = form.cleaned_data["email"]
-            request.session['email'] = email     # Get phone number from the  form
-            amount = 1  # The set amount,  i will change this later
-            stk_push_success = initiate_mpesa_stk_push(phone_number,amount,request)
+            amount = 1  # The set amount,i will change this later
+            stk_push_success = initiate_mpesa_stk_push(phone_number,amount)
 
             # Redirect to the thank you page if the STK push is successful
             if stk_push_success:
@@ -89,19 +87,18 @@ def get_access_token():
 
 
 
-def initiate_mpesa_stk_push(phone_number,amount,request):
+def initiate_mpesa_stk_push(phone_number,amount):
     try:
         # Mpesa credentials
         shortcode = env('shortcode')
         passkey = env('passkey')
         amount = amount
         phone_number = phone_number
-        callback_url = 'https://7256-154-77-75-130.ngrok-free.app/callback/'
+        callback_url = 'https://2e65-154-159-252-51.ngrok-free.app/callback/'
         # timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         password = generate_password(shortcode, passkey, timestamp)
-        email = request.session.get('email')
-        print("email",email)
+
 
         # Payload for the API
         payload = {
@@ -114,7 +111,7 @@ def initiate_mpesa_stk_push(phone_number,amount,request):
             "PartyB": shortcode,
             "PhoneNumber": phone_number,
             "CallBackURL": callback_url,
-            "AccountReference":email,
+            "AccountReference":"TestAccount",
             "TransactionDesc": "Payment for service"
         }
 
@@ -195,8 +192,6 @@ class MpesaExpressCallback(APIView):
                     phone_number = item["Value"]
                 elif item["Name"] == "TransactionDate":
                     transaction_date = item["Value"]
-                elif item['Name'] == "AccountReference":
-                    account_reference = item["Value"]
 
             # Convert transaction date
             if transaction_date:
@@ -221,7 +216,6 @@ class MpesaExpressCallback(APIView):
                 MpesaReceiptNumber=receipt_number,
                 TransactionDate=aware_transaction_datetime,
                 PhoneNumber=phone_number,
-                email=account_reference,
             )
 
             return JsonResponse({"status": "success", "message": "Callback handled successfully"}, status=HTTP_200_OK)
